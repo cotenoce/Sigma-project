@@ -1,0 +1,63 @@
+---
+- name: Restore MariaDB database from SQL dump on AWS RDS
+  hosts: rds  # Assuming you run Ansible from your local machine
+
+  # vars:
+  #   application_env: "{{ lookup('env', 'APPLICATION_ENV') }}"
+  #   application_name: "{{ lookup('env', 'APPLICATION_NAME') }}"
+  #   path_to_dump: "wordpress.sql"
+  #   db_port: "3306"
+  vars:
+    application_env: "dev"
+    application_name: "wordpress"
+    db_password: "admin123"
+    db_username: "admin"
+    db_name: "wordpress"
+    db_url: "sigma-project-db.c58gqg8qk41f.us-east-1.rds.amazonaws.com"
+    alb_dns: "sigma-project-alb-464302615.us-east-1.elb.amazonaws.com"
+    path_to_dump: "/home/olga/Training/ansible/wordpress.sql"
+    db_port: "3306"
+
+  tasks:
+    - name: Set environment variables
+      set_fact:
+        application_env: "{{ application_env }}"
+        application_name: "{{ application_name }}"
+        db_password: "{{ db_password }}"
+        db_username: "{{ db_username }}"
+        db_name: "{{ db_name }}"
+        db_url: "{{ db_url }}"
+        alb_dns: "{{ alb_dns }}"
+
+    # - name: Current env
+    #   debug:
+    #     msg: "{{ application_env }}"
+
+    # - name: Current app_name
+    #   debug:
+    #     msg: "{{ application_name }}"
+
+    # - name: Get DB params from AWS Parameter store
+    #   set_fact:
+    #     "{{ item.fact_name }}": "{{ lookup('aws_ssm', item.name) }}"
+    #   loop: "{{ db_params }}"
+    
+    # - name: ALB dns name
+    #   debug:
+    #     msg: "{{ alb_dns }}"
+
+    # - name: Replace 'localhost' with ALB Name
+    #   ansible.builtin.replace:
+    #     path: "{{ path_to_dump }}"
+    #     regexp: 'localhost'
+    #     replace: "{{ alb_dns }}"
+    
+    - name: Restore database from SQL dump
+      ansible.builtin.shell: >
+        mysql -h "{{ db_url }}" -P "{{ db_port }}" -u "{{ db_username }}" -p"{{ db_password }}" "{{ db_name }}" < "{{ path_to_dump }}"
+      register: restore_result
+
+    - name: Print restore result
+      debug:
+        var: restore_result.stderr_lines
+      

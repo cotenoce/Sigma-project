@@ -1,0 +1,36 @@
+- name: Check connection to RDS
+  hosts: localhost
+  gather_facts: no
+  vars:
+    db_host: "sigma-project-db.c58gqg8qk41f.us-east-1.rds.amazonaws.com"
+    db_port: "3306"
+    db_password: "admin123"
+    db_username: "admin"
+    db_name: "wordpress"
+    path_to_dump: "/home/olga/Training/terraform/ansible/wordpress.sql"
+
+  tasks:
+    - name: Restore database from SQL dump
+      ansible.builtin.shell: >
+        mysql -h "{{ db_host }}" -P "{{ db_port }}" -u "{{ db_username }}" -p"{{ db_password }}" "{{ db_name }}" < "{{ path_to_dump }}"
+      register: restore_result
+
+    - name: Print restore result
+      debug:
+        var: restore_result.stderr_lines
+      
+    # - name: Check connection to RDS
+    #   ansible.builtin.shell: >
+    #     mysql -h {{ db_host }} -P {{ db_port }} -u {{ db_username }} -p{{ db_password }} -e "SHOW DATABASES;"
+    #   register: mysql_test
+    #   environment:
+    #     MYSQL_PWD: "{{ db_password }}"
+
+    # - name: Debug connection output
+    #   debug:
+    #     var: mysql_test.stdout_lines
+
+    # - name: Fail if connection failed
+    #   fail:
+    #     msg: "Unable to connect to RDS instance."
+    #   when: mysql_test.rc != 0
