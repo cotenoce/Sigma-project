@@ -1,0 +1,29 @@
+variable "aws_region" {
+  default = "us-east-1"
+}
+variable "env" {
+  default = "sigma"
+}
+
+variable "app_name" {
+  default = "project"
+}
+
+variable "tags" {
+  default = "sigma-project"
+}
+variable "alb" {
+  default = "alb"
+}
+
+variable "asg_ec2_instance_type" {
+  default = "t2.micro"
+}
+
+locals {
+  asg_sg_id = "sg-04dd16a4286696ff5"
+}
+
+# locals {
+#   subnets= "subnet-0bd9703557821ad2e"
+# }
